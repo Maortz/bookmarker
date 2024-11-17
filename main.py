@@ -3,7 +3,6 @@ from command_line import parse_args
 from core import run_from_file
 from gui import launch_gui
 
-start_service()
 if __name__ == "__main__":
     import sys
 
