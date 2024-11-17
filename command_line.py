@@ -1,4 +1,5 @@
 import argparse
+
 from config import Args
 from output_generators import write_html, write_svgs
 
@@ -27,16 +28,16 @@ def parse_args() -> Args:
         "--html",
         dest="printer",
         action="store_const",
-        help="generate printable html instead of pdf",
+        help="generates a printable html (instead of multiple svgs files)",
         const=write_html,
         default=write_svgs,
     )
     parser.add_argument(
-        "--ui",
+        "--mode",
         type=str,
-        choices=["cmd", "streamlit", "gui"],
-        default="gui",
-        help="Choose UI type (default: gui)",
+        choices=["cmd", "gui", "srv"],
+        default="cmd",
+        help="Choose running mode (default: cmd)",
     )
 
     return parser.parse_args()

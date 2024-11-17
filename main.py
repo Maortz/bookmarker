@@ -1,21 +1,20 @@
-# import subprocess
-from gui import launch_gui
+from api import start_service
 from command_line import parse_args
-from core import do
-# import streamlit_app
+from core import run_from_file
+from gui import launch_gui
 
+start_service()
 if __name__ == "__main__":
     import sys
 
     args = parse_args()
 
-    if args.ui == "gui":
+    if args.mode == "gui":
         launch_gui()
-    elif args.ui == "streamlit":
-        # subprocess.run(["streamlit", "run", streamlit_app.__file__])
-        print("not supported")
+    elif args.mode == "srv":
+        start_service()
     else:
         if not args.input or not args.out:
             print("Error: --input and --out are required when not using UI")
             sys.exit(1)
-        do(args)
+        run_from_file(args)

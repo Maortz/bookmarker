@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+
 from config import Cell, Config
 
 
@@ -7,7 +7,7 @@ def more_col_avaible(left_space: int, conf: Config) -> bool:
     return left_space - conf.total_w_col >= conf.left_margin
 
 
-def get_idx(conf: Config, csv_lines: int) -> List[Cell]:
+def get_idx(conf: Config, csv_lines: int) -> list[Cell]:
     idx = []
     width = conf.size.width - conf.right_page_margin
     cols_for_row = csv_lines / conf.max_lines
@@ -19,9 +19,17 @@ def get_idx(conf: Config, csv_lines: int) -> List[Cell]:
     return idx
 
 
-def read_csv(filename: str) -> List[Cell]:
+def read_csv(filename: str) -> list[Cell]:
     entries = []
     with Path(filename).open("r", encoding="utf8") as file:
         for line in file:
             entries.append(Cell(*line.split(",")[:2]))
+    return entries
+
+
+def parse_csv(csv_content: str) -> list[Cell]:
+    entries = []
+    csv_content = csv_content.splitlines()
+    for line in csv_content:
+        entries.append(Cell(*line.split(",")[:2]))
     return entries

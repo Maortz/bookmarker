@@ -1,9 +1,8 @@
-from typing import List
 from config import Cell, Config
 
 
 def col_to_svg(
-    col: Cell, row: int, page: int, idx: List[Cell], bold: bool = False
+    col: Cell, row: int, page: int, idx: list[Cell], bold: bool = False
 ) -> str:
     date_w = idx[page].date
     info_w = idx[page].info
@@ -16,7 +15,7 @@ def col_to_svg(
     return f"{s1}\n{s2}"
 
 
-def get_svg_lines(column: List[Cell], conf: Config, idx: List[Cell]) -> List[List[str]]:
+def get_svg_lines(column: list[Cell], conf: Config, idx: list[Cell]) -> list[list[str]]:
     out_files = [[]]
     page_counter = 0
     visited_rows = 0
@@ -38,7 +37,7 @@ def get_svg_lines(column: List[Cell], conf: Config, idx: List[Cell]) -> List[Lis
     return out_files
 
 
-def gen_header(idx: List[Cell]) -> str:
+def gen_header(idx: list[Cell]) -> str:
     s = []
     for date, info in idx:
         s.append(
@@ -50,7 +49,7 @@ def gen_header(idx: List[Cell]) -> str:
     return "\n".join(s)
 
 
-def generate_svg(data: str, conf: Config, idx: List[Cell]) -> str:
+def generate_svg(data: str, conf: Config, idx: list[Cell]) -> str:
     return f"""
     <svg xmlns="http://www.w3.org/2000/svg"  width="{conf.size_cm.width}cm" height="{conf.size_cm.height}cm" viewBox="0 0 {conf.size.width} {conf.size.height}">
     <!-- Background -->

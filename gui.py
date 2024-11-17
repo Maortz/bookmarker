@@ -1,8 +1,9 @@
-import tkinter as tk
-from tkinter import ttk, filedialog
 import os
+import tkinter as tk
+from tkinter import filedialog, ttk
+
 from config import Args
-from core import do
+from core import run_from_file
 from output_generators import write_html, write_svgs
 
 
@@ -124,7 +125,7 @@ class BookmarkGeneratorGUI:
             )
 
             # Call the do function
-            do(args)
+            run_from_file(args)
 
             self.status_var.set("Bookmarks generated successfully!")
 

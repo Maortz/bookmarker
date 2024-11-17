@@ -1,17 +1,17 @@
 from pathlib import Path
-from typing import List
-from config import Config, Size, Cell
+
+from config import Cell, Config, Size
 from svg_generator import generate_svg
 
 
 def make_bookmark_svgs(
-    pages: List[List[str]], config: Config, idx: List[Cell]
-) -> List[str]:
+    pages: list[list[str]], config: Config, idx: list[Cell]
+) -> list[str]:
     return [generate_svg("\n".join(page), config, idx) for page in pages]
 
 
 def write_svgs(
-    bookmarks: List[List[str]], config: Config, idx: List[Cell], out_dir: str
+    bookmarks: list[list[str]], config: Config, idx: list[Cell], out_dir: str
 ) -> None:
     pages = make_bookmark_svgs(bookmarks, config, idx)
     out_dir = Path(out_dir)
@@ -22,7 +22,7 @@ def write_svgs(
             file.write(page)
 
 
-def make_printable_html(bookmarks: List[str], conf: Config) -> str:
+def make_printable_html(bookmarks: list[str], conf: Config) -> str:
     orientation = "Landscape"
     A4 = Config.fix_a4(Size(width=30, height=21))
     if conf.size_cm.height > A4.height:
@@ -91,7 +91,7 @@ def make_printable_html(bookmarks: List[str], conf: Config) -> str:
 
 
 def write_html(
-    bookmarks: List[List[str]], config: Config, idx: List[Cell], out_dir: str
+    bookmarks: list[list[str]], config: Config, idx: list[Cell], out_dir: str
 ) -> None:
     html = make_printable_html(make_bookmark_svgs(bookmarks, config, idx), config)
     out_dir = Path(out_dir)
