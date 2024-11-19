@@ -25,6 +25,9 @@ def parse_args() -> Args:
         "--height", "-l", type=int, help="bookmark height (cm)", default=15
     )
     parser.add_argument(
+        "--font-size", type=int, help="font size", default=12
+    )
+    parser.add_argument(
         "--html",
         dest="printer",
         action="store_const",

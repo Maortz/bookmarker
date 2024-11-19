@@ -31,11 +31,11 @@ class Config:
     max_lines: int = field(init=False)
 
     def __post_init__(self):
+        object.__setattr__(self, "ratio", 48 / self.ratio)
         size = self.cm_to_points(self.size_cm)
         object.__setattr__(self, "size", size)
         object.__setattr__(self, "total_w_col", self.date_width + self.info_witdh)
         object.__setattr__(self, "max_lines", (size.height - self.height_margins) // 10)
-        object.__setattr__(self, "ratio", 48 / self.ratio)
 
     def cm_to_points(self, s_cm: Size) -> Size:
         convert_ratio = 10 * self.ratio
