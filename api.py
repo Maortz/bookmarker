@@ -20,6 +20,7 @@ app = FastAPI(
 async def generate_bookmark(
     width: int = Query(10, description="Bookmark width (cm)"),
     height: int = Query(15, description="Bookmark height (cm)"),
+    font: int = Query(12, description="Font size"),
     csv_file: UploadFile = File(..., description="CSV file with date and chapter"),
 ):
     csv_content = await csv_file.read()
@@ -31,6 +32,7 @@ async def generate_bookmark(
             out=tmpdirname,
             width=width,
             height=height,
+            font_size=font,
             printer=write_html,
         )
         run_from_str(args)
@@ -45,6 +47,7 @@ async def generate_bookmark(
 async def generate_svgs(
     width: int = Query(10, description="Bookmark width (cm)"),
     height: int = Query(15, description="Bookmark height (cm)"),
+    font: int = Query(12, description="Font size"),
     csv_file: UploadFile = File(..., description="CSV file with date and chapter"),
 ):
     csv_content = await csv_file.read()
@@ -56,6 +59,7 @@ async def generate_svgs(
             out=tmpdirname,
             width=width,
             height=height,
+            font_size=font,
             printer=write_svgs,
         )
         run_from_str(args)

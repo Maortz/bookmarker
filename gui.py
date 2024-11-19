@@ -121,6 +121,7 @@ class BookmarkGeneratorGUI:
                 out=self.output_path.get(),
                 width=int(self.width.get()),
                 height=int(self.height.get()),
+                font_size=12,
                 printer=write_html if self.output_type.get() else write_svgs,
             )
 

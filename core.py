@@ -4,7 +4,7 @@ from utils import get_idx, parse_csv, read_csv
 
 
 def run_from_file(args: Args) -> None:
-    config = Config(Config.fix_a4(Size(args.width, args.height)))
+    config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
     csv = read_csv(args.input)
     idx = get_idx(config, len(csv))
     bookmarks = get_svg_lines(csv, config, idx)
@@ -12,7 +12,7 @@ def run_from_file(args: Args) -> None:
 
 
 def run_from_str(args: Args) -> None:
-    config = Config(Config.fix_a4(Size(args.width, args.height)))
+    config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
     csv = parse_csv(args.input)
     idx = get_idx(config, len(csv))
     bookmarks = get_svg_lines(csv, config, idx)

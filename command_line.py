@@ -25,12 +25,15 @@ def parse_args() -> Args:
         "--height", "-l", type=int, help="bookmark height (cm)", default=15
     )
     parser.add_argument(
-        "--html",
+        "--font-size", type=int, help="font size", default=12
+    )
+    parser.add_argument(
+        "--svg",
         dest="printer",
         action="store_const",
-        help="generates a printable html (instead of multiple svgs files)",
-        const=write_html,
-        default=write_svgs,
+        help="generates multiple svgs files (instead of a printable html)",
+        const=write_svgs,
+        default=write_html,
     )
     parser.add_argument(
         "--mode",

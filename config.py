@@ -12,12 +12,14 @@ class Args:
     out: str
     width: int
     height: int
+    font_size: int
     printer: Callable
 
 
 @dataclass(frozen=True)
 class Config:
     size_cm: Size
+    ratio: float
 
     size: Size = field(init=False)
     right_page_margin: int = 60
@@ -27,9 +29,9 @@ class Config:
     left_margin: int = -20
     total_w_col: int = field(init=False)
     max_lines: int = field(init=False)
-    ratio: int = 4  # bigger ratio -> smaller font
 
     def __post_init__(self):
+        object.__setattr__(self, "ratio", 48 / self.ratio)
         size = self.cm_to_points(self.size_cm)
         object.__setattr__(self, "size", size)
         object.__setattr__(self, "total_w_col", self.date_width + self.info_witdh)
