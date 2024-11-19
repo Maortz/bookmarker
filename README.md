@@ -2,6 +2,8 @@
 
 Generate beautiful bookmarks for your daily learning schedule! This tool helps you create customized bookmarks based on your reading plan, with multiple usage options to suit your needs.
 
+Check it out on [render!](https://bookmarker-9dns.onrender.com/docs)
+
 ## 🌟 Features
 
 - Generate bookmarks in SVG or HTML format
