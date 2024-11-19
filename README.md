@@ -23,7 +23,8 @@ Options:
 - `-o, --out`: Output directory
 - `-w, --width`: Bookmark width in cm (default: 10)
 - `-l, --height`: Bookmark height in cm (default: 15)
-- `--html`: Generate printable HTML instead of SVG files
+- `--font-size`: Font size (default: 12)
+- `--svg`: Generate SVG files instead of printable HTML
 - `--mode`: Choose running mode (cmd/gui/srv)
 - `-h, --help`: Help
 
@@ -39,6 +40,7 @@ Available endpoints:
   - Parameters:
     - `width`: Bookmark width in cm (default: 10)
     - `height`: Bookmark height in cm (default: 15)
+    - `font`: font size (default: 12)
     - `csv_file`: Upload your CSV file
 
 - `POST /bookmarker/svgs`: Generate bookmarks in SVG format

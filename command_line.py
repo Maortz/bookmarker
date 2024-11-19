@@ -28,12 +28,12 @@ def parse_args() -> Args:
         "--font-size", type=int, help="font size", default=12
     )
     parser.add_argument(
-        "--html",
+        "--svg",
         dest="printer",
         action="store_const",
-        help="generates a printable html (instead of multiple svgs files)",
-        const=write_html,
-        default=write_svgs,
+        help="generates multiple svgs files (instead of a printable html)",
+        const=write_svgs,
+        default=write_html,
     )
     parser.add_argument(
         "--mode",
