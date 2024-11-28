@@ -13,7 +13,15 @@ def run_from_file(args: Args) -> None:
 
 def run_from_str(args: Args) -> None:
     config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
-    csv = parse_csv(args.input)
+    csv = parse_csv(args.input.splitlines())
+    idx = get_idx(config, len(csv))
+    bookmarks = get_svg_lines(csv, config, idx)
+    args.printer(bookmarks, config, idx, args.out)
+
+
+def run_from_lst(args: Args) -> None:
+    config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
+    csv = args.input
     idx = get_idx(config, len(csv))
     bookmarks = get_svg_lines(csv, config, idx)
     args.printer(bookmarks, config, idx, args.out)

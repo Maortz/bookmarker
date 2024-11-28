@@ -1,17 +1,17 @@
 from pathlib import Path
 
-from config import Cell, Config, Size
+from config import Row, Config, Size
 from svg_generator import generate_svg
 
 
 def make_bookmark_svgs(
-    pages: list[list[str]], config: Config, idx: list[Cell]
+    pages: list[list[str]], config: Config, idx: list[Row]
 ) -> list[str]:
     return [generate_svg("\n".join(page), config, idx) for page in pages]
 
 
 def write_svgs(
-    bookmarks: list[list[str]], config: Config, idx: list[Cell], out_dir: str
+    bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir: str
 ) -> None:
     pages = make_bookmark_svgs(bookmarks, config, idx)
     out_dir = Path(out_dir)
@@ -91,7 +91,7 @@ def make_printable_html(bookmarks: list[str], conf: Config) -> str:
 
 
 def write_html(
-    bookmarks: list[list[str]], config: Config, idx: list[Cell], out_dir: str
+    bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir: str
 ) -> None:
     html = make_printable_html(make_bookmark_svgs(bookmarks, config, idx), config)
     out_dir = Path(out_dir)
