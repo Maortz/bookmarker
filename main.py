@@ -1,5 +1,5 @@
 from api import start_service
-from command_line import parse_args
+from cli import parse_args
 from core import run_from_file
 from gui import launch_gui
 

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 Size = namedtuple("Size", ["width", "height"])
-Cell = namedtuple("Cell", ["date", "info"])
+Row = namedtuple("Row", ["date", "info", "bold"], defaults=(None,)*3)
 
 
 @dataclass

@@ -1,21 +1,22 @@
-from config import Cell, Config
+from config import Row, Config
 
 
 def col_to_svg(
-    col: Cell, row: int, page: int, idx: list[Cell], bold: bool = False
+    col: Row, row: int, page: int, idx: list[Row], bold: bool = False
 ) -> str:
     date_w = idx[page].date
     info_w = idx[page].info
 
     s1 = f'<text x="{date_w}" y="{row * 10}" text-anchor="end" font-family="Arial" font-size="10">{col.date}</text>'
-    s2 = f'<text x="{info_w}" y="{row * 10}" text-anchor="end" font-family="Arial" font-size="10">{col.info}</text>'
-    if bold or len(col.info.split(" ")) != 3:
+    if col.bold:
         s2 = f'<text x="{info_w}" y="{row * 10}" text-anchor="end" font-family="Arial" font-size="10" font-weight="bold">{col[1]}</text>'
+    else:
+        s2 = f'<text x="{info_w}" y="{row * 10}" text-anchor="end" font-family="Arial" font-size="10">{col.info}</text>'
 
     return f"{s1}\n{s2}"
 
 
-def get_svg_lines(column: list[Cell], conf: Config, idx: list[Cell]) -> list[list[str]]:
+def get_svg_lines(column: list[Row], conf: Config, idx: list[Row]) -> list[list[str]]:
     out_files = [[]]
     page_counter = 0
     visited_rows = 0
@@ -31,15 +32,15 @@ def get_svg_lines(column: list[Cell], conf: Config, idx: list[Cell]) -> list[lis
                 out_files.append([])
 
         out_files[-1].append(
-            col_to_svg(col=cell, row=row, page=page_counter, idx=idx, bold=i % 7 == 1)
+            col_to_svg(col=cell, row=row, page=page_counter, idx=idx)
         )
 
     return out_files
 
 
-def gen_header(idx: list[Cell]) -> str:
+def gen_header(idx: list[Row]) -> str:
     s = []
-    for date, info in idx:
+    for date, info, _ in idx:
         s.append(
             f'<text x="{date}" y="0" text-anchor="end" font-family="Arial" font-size="12" fill="#8b4513">תאריך</text>'
         )
@@ -49,7 +50,7 @@ def gen_header(idx: list[Cell]) -> str:
     return "\n".join(s)
 
 
-def generate_svg(data: str, conf: Config, idx: list[Cell]) -> str:
+def generate_svg(data: str, conf: Config, idx: list[Row]) -> str:
     return f"""
     <svg xmlns="http://www.w3.org/2000/svg"  width="{conf.size_cm.width}cm" height="{conf.size_cm.height}cm" viewBox="0 0 {conf.size.width} {conf.size.height}">
     <!-- Background -->
