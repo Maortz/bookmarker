@@ -58,6 +58,7 @@ class PageBookmark(Bookmark):
 
 class ScheduleResponse(BaseModel):
     schedule: list[SectionsBookmark]
+    book: str
     total_units: int
     days_to_complete: int
     units_per_day: int
