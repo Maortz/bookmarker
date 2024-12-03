@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, File, Query, UploadFile
-from fastapi.responses import RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 
 from config import Args
 from core import run_from_lst, run_from_str
@@ -22,6 +22,62 @@ app = FastAPI(
 @app.get("/", include_in_schema=False)
 async def root():
     return RedirectResponse("/docs")
+
+
+@app.get("/bookmarker/tanah")
+async def gen_tanah_htmlpage(
+    width: int = Query(10, description="Bookmark width (cm)"),
+    height: int = Query(15, description="Bookmark height (cm)"),
+    font: int = Query(12, description="Font size"),
+    start_date: datetime.date = Query(
+        ...,
+        description="Start date (in the format of 2024-10-03)",
+        examples=["2024-10-03"],
+    ),
+    end_date: Optional[datetime.date] = Query(
+        None,
+        description="End date, inclusive (default to 1 hebrew year)",
+        examples=[None, "2025-09-22"],
+    ),
+    shabbos: bool = Query(True, description="Do not schedule learning on Shabbos"),
+    major_holidays: bool = Query(
+        True, description="Do not schedule learning on non-working holidays"
+    ),
+    minor_holidays: bool = Query(
+        False,
+        description="Do not schedule learning on working holidays (Hanuka, Hol Hamoed, etc.)",
+    ),
+    extra_holidays: bool = Query(
+        True,
+        description="Do not schedule learning on Purim, Tishaa Beav and Yom Haatzmaut",
+    ),
+    bold: bool = Query(True, description="Bold Shabbos or any non-learning day"),
+):
+    csv_decoded = Path("examples/tanah_yomi.csv").read_text(encoding="utf-8")
+    lines = csv_decoded.splitlines()
+    input_lines = generate_csv(
+        *convert_date(start_date, end_date),
+        iter(lines),
+        shabbos=shabbos,
+        major_holidays=major_holidays,
+        minor_holidays=minor_holidays,
+        extra_holidays=extra_holidays,
+        bold=bold,
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        args = Args(
+            input=input_lines,
+            out=tmpdirname,
+            width=width,
+            height=height,
+            font_size=font,
+            printer=write_html,
+        )
+        run_from_lst(args)
+        content = (Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")
+        return HTMLResponse(content)
+
 
 @app.post("/bookmarker/html")
 async def generate_html(
