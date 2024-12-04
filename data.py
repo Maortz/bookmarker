@@ -1,4 +1,5 @@
 import asyncio
+from functools import cache
 import json
 import traceback
 import urllib
@@ -8,9 +9,9 @@ from typing import Optional
 import httpx
 from fastapi import HTTPException
 
-from model import Book
+from model import Book, BookData
 
-
+@cache
 async def fetch_data_by_text(book: str) -> dict:
     """Fetch Mishna Zraim data from Sefaria API"""
     async with httpx.AsyncClient() as client:
@@ -75,22 +76,22 @@ def test_corpus():
     assert len(find_corpus("Talmud Bavli")) == 38
     assert len(find_corpus("Talmud Yerushalmi")) == 38
 
-
+@cache
 async def fetch(book: str):
     # try single book (text)
     try:
         mishna_data = await fetch_data_by_text(book)
-        return [(book, parse_text_structure(mishna_data))]
+        return [BookData(bookname=book, book=parse_text_structure(mishna_data))]
     except HTTPException:
         pass
     # try corpus (text)
     books = find_corpus(book)
     if not books:
-        raise Exception("book not found")
-    
+        raise HTTPException(status_code=400, detail="Book not found")
+
     async def process_book(book):
         mishna_data = await fetch_data_by_text(book)
-        return book, parse_text_structure(mishna_data)
+        return BookData(bookname=book, book=parse_text_structure(mishna_data))
 
     tasks = [process_book(book) for book in books]
     return await asyncio.gather(*tasks)
