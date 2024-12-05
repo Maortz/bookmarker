@@ -1,5 +1,5 @@
 import asyncio
-from functools import cache
+from aiocache import cached
 import json
 import traceback
 import urllib
@@ -11,7 +11,7 @@ from fastapi import HTTPException
 
 from model import Book, BookData
 
-@cache
+@cached()
 async def fetch_data_by_text(book: str) -> dict:
     """Fetch Mishna Zraim data from Sefaria API"""
     async with httpx.AsyncClient() as client:
@@ -76,7 +76,7 @@ def test_corpus():
     assert len(find_corpus("Talmud Bavli")) == 38
     assert len(find_corpus("Talmud Yerushalmi")) == 38
 
-@cache
+@cached()
 async def fetch(book: str):
     # try single book (text)
     try:
