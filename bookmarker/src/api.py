@@ -5,12 +5,12 @@ from io import BytesIO, StringIO
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, File, Query, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 
 from config import Args
 from core import run_from_lst, run_from_str
-from input_generator import convert_date, generate_csv
+from input_generator import convert_date, generate_csv, learning_days
 from output_generators import write_html, write_svgs
 
 app = FastAPI(
@@ -22,6 +22,11 @@ app = FastAPI(
 @app.get("/", include_in_schema=False)
 async def root():
     return RedirectResponse("/docs")
+
+
+@app.get("/health", include_in_schema=False)
+async def health_check():
+    return {"status": "healthy"}
 
 
 @app.get("/bookmarker/tanah")
@@ -53,7 +58,18 @@ async def gen_tanah_htmlpage(
     ),
     bold: bool = Query(True, description="Bold Shabbos or any non-learning day"),
 ):
-    csv_decoded = Path("examples/tanah_yomi.csv").read_text(encoding="utf-8")
+    days = learning_days(
+        *convert_date(start_date, end_date),
+        shabbos=shabbos,
+        major_holidays=major_holidays,
+        minor_holidays=minor_holidays,
+        extra_holidays=extra_holidays,
+    )
+    if days > 295 or days < 293:
+        raise HTTPException(
+            status_code=404, detail="Tanah Yomi Seder doesn't fits calender days"
+        )
+    csv_decoded = Path(f"../examples/tanah_yomi_{days}.csv").read_text(encoding="utf-8")
     lines = csv_decoded.splitlines()
     input_lines = generate_csv(
         *convert_date(start_date, end_date),

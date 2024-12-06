@@ -64,7 +64,7 @@ def find_corpus_in_category(book: str, category: dict) -> list[str]:
 
 
 def find_corpus(book: str):
-    with Path("index.json").open("r", encoding="utf-8-sig") as fd:
+    with Path("../resource/index.json").open("r", encoding="utf-8-sig") as fd:
         idx = json.load(fd)
     cat = find_category_in_index(book, idx)
     if cat:

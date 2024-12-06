@@ -70,6 +70,25 @@ def generate_hebrew_dates(
         current_date = current_date.add(days=1)
 
 
+def learning_days(
+    start_date: HebrewDate,
+    end_date: HebrewDate,
+    /,
+    shabbos: bool = True,
+    major_holidays: bool = True,
+    minor_holidays: bool = False,
+    extra_holidays: bool = True,
+) -> int:
+    days = generate_hebrew_dates(
+        start_date,
+        end_date,
+        major_holidays=major_holidays,
+        minor_holidays=minor_holidays,
+        extra_holidays=extra_holidays,
+    )
+    return sum(1 for date, info in days if not (info and shabbos))
+
+
 def generate_csv(
     start_date: HebrewDate,
     end_date: HebrewDate,
@@ -137,9 +156,10 @@ def generate_csv_from_file(
 ) -> list[Row]:
     with open(input_csv, mode="r") as file:
         p_iter = csv.reader(file)
+
         def it_wrapper(it):
             return map(lambda x: x[0], it)
-        
+
         return generate_csv(
             start_date,
             end_date,

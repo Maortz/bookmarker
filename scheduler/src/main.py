@@ -96,6 +96,11 @@ async def root():
     return {"message": "Mishna Learning Schedule API", "version": "1.0"}
 
 
+@app.get("/health", include_in_schema=False)
+async def health_check():
+    return {"status": "healthy"}
+
+
 @app.post("/schedule", response_model=list[ScheduleResponse])
 async def create_schedule(book_name: str, request: ScheduleRequest):
     """Create a learning schedule based on frequency or total days"""
