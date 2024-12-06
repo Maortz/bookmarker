@@ -8,10 +8,10 @@ from typing import Optional
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 
-from config import Args
-from core import run_from_lst, run_from_str
-from input_generator import convert_date, generate_csv, learning_days
-from output_generators import write_html, write_svgs
+from src.config import Args
+from src.core import run_from_lst, run_from_str
+from src.input_generator import convert_date, generate_csv, learning_days
+from src.output_generators import write_html, write_svgs
 
 app = FastAPI(
     title="Daily Bookmark Generator",
@@ -69,7 +69,7 @@ async def gen_tanah_htmlpage(
         raise HTTPException(
             status_code=404, detail="Tanah Yomi Seder doesn't fits calender days"
         )
-    csv_decoded = Path(f"../examples/tanah_yomi_{days}.csv").read_text(encoding="utf-8")
+    csv_decoded = Path(f"examples/tanah_yomi_{days}.csv").read_text(encoding="utf-8")
     lines = csv_decoded.splitlines()
     input_lines = generate_csv(
         *convert_date(start_date, end_date),

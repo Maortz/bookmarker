@@ -1,4 +1,4 @@
-from config import Row, Config
+from src.config import Row, Config
 
 
 def col_to_svg(

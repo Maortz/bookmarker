@@ -6,7 +6,7 @@ from pyluach import parshios
 from pyluach.dates import HebrewDate
 from pyluach.parshios import PARSHIOS_HEBREW
 
-from utils import Row
+from src.utils import Row
 
 
 def get_yom_haatzmaut(year: int) -> HebrewDate:

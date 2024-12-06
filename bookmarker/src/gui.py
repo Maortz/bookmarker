@@ -2,9 +2,9 @@ import os
 import tkinter as tk
 from tkinter import filedialog, ttk
 
-from config import Args
-from core import run_from_file
-from output_generators import write_html, write_svgs
+from src.config import Args
+from src.core import run_from_file
+from src.output_generators import write_html, write_svgs
 
 
 class BookmarkGeneratorGUI:

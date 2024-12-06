@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Iterable
 
-from config import Row, Config
+from src.config import Row, Config
 
 
 def more_col_avaible(left_space: int, conf: Config) -> bool:

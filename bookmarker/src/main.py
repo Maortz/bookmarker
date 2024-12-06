@@ -1,7 +1,7 @@
-from api import start_service
-from cli import parse_args
-from core import run_from_file
-from gui import launch_gui
+from src.api import start_service
+from src.cli import parse_args
+from src.core import run_from_file
+from src.gui import launch_gui
 
 if __name__ == "__main__":
     import sys

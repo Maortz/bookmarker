@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from config import Row, Config, Size
-from svg_generator import generate_svg
+from src.config import Row, Config, Size
+from src.svg_generator import generate_svg
 
 
 def make_bookmark_svgs(

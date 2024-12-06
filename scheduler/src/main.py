@@ -4,8 +4,8 @@ from itertools import accumulate
 
 from fastapi import FastAPI
 
-from data import fetch
-from model import (
+from src.data import fetch
+from src.model import (
     Book,
     BookData,
     ScheduleRequest,

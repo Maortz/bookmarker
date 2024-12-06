@@ -1,6 +1,6 @@
-from config import Args, Config, Size
-from svg_generator import get_svg_lines
-from utils import get_idx, parse_csv, read_csv
+from src.config import Args, Config, Size
+from src.svg_generator import get_svg_lines
+from src.utils import get_idx, parse_csv, read_csv
 
 
 def run_from_file(args: Args) -> None:

@@ -9,7 +9,7 @@ from typing import Optional
 import httpx
 from fastapi import HTTPException
 
-from model import Book, BookData
+from src.model import Book, BookData
 
 @cached()
 async def fetch_data_by_text(book: str) -> dict:

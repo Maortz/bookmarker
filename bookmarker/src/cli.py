@@ -1,7 +1,7 @@
 import argparse
 
-from config import Args
-from output_generators import write_html, write_svgs
+from src.config import Args
+from src.output_generators import write_html, write_svgs
 
 
 def parse_args() -> Args:
