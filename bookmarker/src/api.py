@@ -65,10 +65,12 @@ async def gen_tanah_htmlpage(
         minor_holidays=minor_holidays,
         extra_holidays=extra_holidays,
     )
-    if days > 295 or days < 293:
+    if days < 293:
         raise HTTPException(
             status_code=404, detail="Tanah Yomi Seder doesn't fits calender days"
         )
+    if days > 297:
+        days = 297
     csv_decoded = Path(f"examples/tanah_yomi_{days}.csv").read_text(encoding="utf-8")
     lines = csv_decoded.splitlines()
     input_lines = generate_csv(
