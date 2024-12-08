@@ -1,27 +1,18 @@
-from src.config import Args, Config, Size
+from src.config import Args, Config, Row, Size
 from src.svg_generator import get_svg_lines
 from src.utils import get_idx, parse_csv, read_csv
 
 
-def run_from_file(args: Args) -> None:
+def from_file(args_input: str) -> list[Row]:
+    return read_csv(args_input)
+
+
+def from_str(args_input: str) -> list[Row]:
+    return parse_csv(args_input.splitlines())
+
+
+def run(args: Args) -> None:
     config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
-    csv = read_csv(args.input)
-    idx = get_idx(config, len(csv))
-    bookmarks = get_svg_lines(csv, config, idx)
-    args.printer(bookmarks, config, idx, args.out)
-
-
-def run_from_str(args: Args) -> None:
-    config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
-    csv = parse_csv(args.input.splitlines())
-    idx = get_idx(config, len(csv))
-    bookmarks = get_svg_lines(csv, config, idx)
-    args.printer(bookmarks, config, idx, args.out)
-
-
-def run_from_lst(args: Args) -> None:
-    config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
-    csv = args.input
-    idx = get_idx(config, len(csv))
-    bookmarks = get_svg_lines(csv, config, idx)
+    idx = get_idx(config, len(args.input))
+    bookmarks = get_svg_lines(args.input, config, idx)
     args.printer(bookmarks, config, idx, args.out)

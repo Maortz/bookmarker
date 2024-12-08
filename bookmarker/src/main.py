@@ -1,6 +1,6 @@
 from src.api import start_service
 from src.cli import parse_args
-from src.core import run_from_file
+from src.core import from_file, run
 from src.gui import launch_gui
 
 if __name__ == "__main__":
@@ -16,4 +16,5 @@ if __name__ == "__main__":
         if not args.input or not args.out:
             print("Error: --input and --out are required when not using UI")
             sys.exit(1)
-        run_from_file(args)
+        args.input = from_file(args.input)
+        run(args)

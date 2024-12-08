@@ -8,7 +8,7 @@ Row = namedtuple("Row", ["date", "info", "bold"], defaults=(None,)*3)
 
 @dataclass
 class Args:
-    input: str
+    input: list[Row]
     out: str
     width: int
     height: int

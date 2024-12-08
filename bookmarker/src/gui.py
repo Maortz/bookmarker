@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, ttk
 
 from src.config import Args
-from src.core import run_from_file
+from src.core import from_file, run
 from src.output_generators import write_html, write_svgs
 
 
@@ -117,7 +117,7 @@ class BookmarkGeneratorGUI:
         try:
             # Create args object
             args = Args(
-                input=self.input_path.get(),
+                input=from_file(self.input_path.get()),
                 out=self.output_path.get(),
                 width=int(self.width.get()),
                 height=int(self.height.get()),
@@ -126,7 +126,7 @@ class BookmarkGeneratorGUI:
             )
 
             # Call the do function
-            run_from_file(args)
+            run(args)
 
             self.status_var.set("Bookmarks generated successfully!")
 

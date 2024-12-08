@@ -3,15 +3,14 @@ import shutil
 import tempfile
 from io import BytesIO, StringIO
 from pathlib import Path
-from typing import Optional
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
-from pyluach.dates import HebrewDate
 from src.config import Args
-from src.core import run_from_lst, run_from_str
-from src.input_generator import convert_date, generate_csv, learning_days
+from src.core import from_str, run
+from src.input_generator import HebrewCalendar
 from src.output_generators import write_html, write_svgs
+from src.utils import convert_date, get_simhat_tora_by
 
 app = FastAPI(
     title="Daily Bookmark Generator",
@@ -27,40 +26,6 @@ async def root():
 @app.get("/health", include_in_schema=False)
 async def health_check():
     return {"status": "healthy"}
-
-
-def heb_to_int(ch: str) -> int:
-    if ord(ch) >= ord("ק"):
-        return (ord(ch) - ord("ק") + 1) * 100
-    if ord(ch) == ord("צ"):
-        return 90
-    if ord(ch) == ord("פ"):
-        return 80
-    if ord(ch) in range(ord("נ"), ord("ע") + 1):
-        return (ord(ch) - ord("כ") - 2) * 10
-    if ord(ch) == ord("מ"):
-        return 40
-    if ord(ch) in (ord("כ"), ord("ל")):
-        return (ord(ch) - 11) * 10
-    if ord(ch) in (ord("ם"), ord("ן"), ord("ץ"), ord("ף"), ord("ך")):
-        raise HTTPException(
-            status_code=400, detail=f"Not handling מנצפך letters (got {ch})"
-        )
-    return ord(ch) - ord("א") + 1
-
-
-def get_heb_year(year: str) -> int:
-    if not isinstance(year, str) or len(year) > 5 or not year:
-        raise HTTPException(status_code=400, detail="Not a valid hebrew year")
-    thousands = 1000 * heb_to_int(year[0])
-    if thousands > 6000:
-        return 5000 + sum(map(heb_to_int, year))
-    return thousands + sum(map(heb_to_int, year[1:]))
-
-
-def get_simhat_tora_by(year: str) -> tuple[HebrewDate, HebrewDate]:
-    s = HebrewDate(get_heb_year(year), 7, 23)
-    return s, s.add(years=1).subtract(days=1)
 
 
 @app.get("/bookmarker/tanah")
@@ -87,41 +52,44 @@ async def gen_tanah_htmlpage(
     ),
     bold: bool = Query(True, description="Bold Shabbos or any non-learning day"),
 ):
-    days = learning_days(
-        *get_simhat_tora_by(year),
-        shabbos=shabbos,
+    try:
+        simhas_torah_dates = get_simhat_tora_by(year)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=exc.args[0])
+    
+    calendar = HebrewCalendar(
+        *simhas_torah_dates,
         major_holidays=major_holidays,
         minor_holidays=minor_holidays,
         extra_holidays=extra_holidays,
     )
+
+    days = calendar.learning_days(shabbos)
     if days < 293:
         raise HTTPException(
             status_code=404, detail="Tanah Yomi Seder doesn't fits calender days"
         )
     if days > 297:
         days = 297
+
     csv_decoded = Path(f"examples/tanah_yomi_{days}.csv").read_text(encoding="utf-8")
-    lines = csv_decoded.splitlines()
-    input_lines = generate_csv(
-        *get_simhat_tora_by(year),
-        iter(lines),
+    chapters_lines = csv_decoded.splitlines()
+    full_bookmark = calendar.generate_csv(
+        iter(chapters_lines),
         shabbos=shabbos,
-        major_holidays=major_holidays,
-        minor_holidays=minor_holidays,
-        extra_holidays=extra_holidays,
         bold=bold,
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         args = Args(
-            input=input_lines,
+            input=full_bookmark,
             out=tmpdirname,
             width=width,
             height=height,
             font_size=font,
             printer=write_html,
         )
-        run_from_lst(args)
+        run(args)
         content = (Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")
         return HTMLResponse(content)
 
@@ -136,7 +104,7 @@ async def generate_html(
         description="Start date (in the format of 2024-10-03)",
         examples=["2024-10-03"],
     ),
-    end_date: Optional[datetime.date] = Query(
+    end_date: datetime.date | None = Query(
         None,
         description="End date, inclusive (default to 1 hebrew year)",
         examples=[None, "2025-09-22"],
@@ -158,27 +126,28 @@ async def generate_html(
 ):
     csv_content = await csv_file.read()
     csv_decoded = csv_content.decode("utf-8")
-    lines = csv_decoded.splitlines()
-    input_lines = generate_csv(
+    chapters_lines = csv_decoded.splitlines()
+    bookmark_csv = HebrewCalendar(
         *convert_date(start_date, end_date),
-        iter(lines),
-        shabbos=shabbos,
         major_holidays=major_holidays,
         minor_holidays=minor_holidays,
         extra_holidays=extra_holidays,
+    ).generate_csv(
+        iter(chapters_lines),
+        shabbos=shabbos,
         bold=bold,
     )
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         args = Args(
-            input=input_lines,
+            input=bookmark_csv,
             out=tmpdirname,
             width=width,
             height=height,
             font_size=font,
             printer=write_html,
         )
-        run_from_lst(args)
+        run(args)
         return StreamingResponse(
             StringIO((Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")),
             media_type="text/html",
@@ -198,14 +167,14 @@ async def generate_svgs(
 
     with tempfile.TemporaryDirectory() as tmpdirname:
         args = Args(
-            input=csv_decoded,
+            input=from_str(csv_decoded),
             out=tmpdirname,
             width=width,
             height=height,
             font_size=font,
             printer=write_svgs,
         )
-        run_from_str(args)
+        run(args)
         zip_path = Path(tmpdirname) / "bookmarks.zip"
         svg_files = list(Path(tmpdirname).glob("*.svg"))
         if svg_files:
