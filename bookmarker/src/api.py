@@ -42,13 +42,19 @@ def heb_to_int(ch: str) -> int:
         return 40
     if ord(ch) in (ord("כ"), ord("ל")):
         return (ord(ch) - 11) * 10
+    if ord(ch) in (ord("ם"), ord("ן"), ord("ץ"), ord("ף"), ord("ך")):
+        raise HTTPException(
+            status_code=400, detail=f"Not handling מנצפך letters (got {ch})"
+        )
     return ord(ch) - ord("א") + 1
 
 
 def get_heb_year(year: str) -> int:
     if not isinstance(year, str) or len(year) > 5 or not year:
-        raise
+        raise HTTPException(status_code=400, detail="Not a valid hebrew year")
     thousands = 1000 * heb_to_int(year[0])
+    if thousands > 6000:
+        return 5000 + sum(map(heb_to_int, year))
     return thousands + sum(map(heb_to_int, year[1:]))
 
 
@@ -64,8 +70,8 @@ async def gen_tanah_htmlpage(
     font: int = Query(12, description="Font size"),
     year: str = Query(
         ...,
-        description="Hebrew year (in the format of התשפה)",
-        examples=["התשפה"],
+        description="Hebrew year (in the format of התשפה, or just תשפה with default 5000)",
+        examples=["התשפה", "תשפה"],
     ),
     shabbos: bool = Query(True, description="Do not schedule learning on Shabbos"),
     major_holidays: bool = Query(
