@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel, model_validator
 
 
@@ -68,9 +67,9 @@ class Bookmark(BaseModel):
 
 
 class SectionsBookmark(Bookmark):
-    section: Optional[int] = None
-    chapter: Optional[int] = None
-    part: Optional[int] = None
+    section: int | None = None
+    chapter: int | None = None
+    part: int | None = None
 
     @model_validator(mode="after")
     def not_empty_validator(self):

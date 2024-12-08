@@ -4,7 +4,6 @@ import json
 import traceback
 import urllib
 from pathlib import Path
-from typing import Optional
 
 import httpx
 from fastapi import HTTPException
@@ -35,7 +34,7 @@ def parse_text_structure(data: dict) -> Book:
     return data["versions"][0]["text"]
 
 
-def find_category_in_index(book: str, idx_json: dict) -> Optional[dict]:
+def find_category_in_index(book: str, idx_json: dict) -> dict | None:
     alt = book.split(" ")[0]
     for d in idx_json:
         if d["category"] in {book, alt}:

@@ -11,7 +11,7 @@ def from_str(args_input: str) -> list[Row]:
     return parse_csv(args_input.splitlines())
 
 
-def run(args: Args) -> None:
+def create_bookmark(args: Args) -> None:
     config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
     idx = get_idx(config, len(args.input))
     bookmarks = get_svg_lines(args.input, config, idx)
