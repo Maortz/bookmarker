@@ -18,8 +18,8 @@ class BookData(BaseModel):
 
 
 class SectionInterval(BaseModel):
-    section: int
-    chapter: int
+    section: int | None = None
+    chapter: int | None = None
 
     @model_validator(mode="after")
     def _mutual_exclusivity_validator(self):
@@ -31,9 +31,9 @@ class SectionInterval(BaseModel):
 
 
 class ScheduleRequest(BaseModel):
-    section_freq: SectionInterval
-    page_freq: int
-    total_days: int
+    section_freq: SectionInterval | None = None
+    page_freq: int | None = None
+    total_days: int | None = None
 
     def is_section(self) -> bool:
         return any(self.section_freq.model_dump().values())
@@ -82,8 +82,14 @@ class PageBookmark(Bookmark):
     page: int
 
 
-class ScheduleResponse(BaseModel):
+class BookSchedule(BaseModel):
     schedule: list[SectionsBookmark]
+    book: str
+    total_units: int
+    days_to_complete: int
+
+class ScheduleResponse(BaseModel):
+    info: list[BookSchedule]
     book: str
     total_units: int
     days_to_complete: int

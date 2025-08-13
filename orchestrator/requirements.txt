@@ -1,0 +1,4 @@
+uvicorn
+pydantic~=2.9.2
+fastapi
+httpx

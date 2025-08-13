@@ -12,7 +12,6 @@ from src.model import Book, BookData
 
 @cached()
 async def fetch_data_by_text(book: str) -> dict:
-    """Fetch Mishna Zraim data from Sefaria API"""
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
@@ -63,11 +62,14 @@ def find_corpus_in_category(book: str, category: dict) -> list[str]:
 
 
 def find_corpus(book: str):
-    with Path("../resource/index.json").open("r", encoding="utf-8-sig") as fd:
+    with Path("resource/index.json").open("r", encoding="utf-8-sig") as fd:
         idx = json.load(fd)
     cat = find_category_in_index(book, idx)
     if cat:
         return find_corpus_in_category(book, cat)
+
+def heb_book_name(text_data: dict) -> str:
+    return text_data['heTitle']
 
 
 def test_corpus():
@@ -80,7 +82,7 @@ async def fetch(book: str):
     # try single book (text)
     try:
         mishna_data = await fetch_data_by_text(book)
-        return [BookData(bookname=book, book=parse_text_structure(mishna_data))]
+        return [BookData(bookname=heb_book_name(mishna_data), book=parse_text_structure(mishna_data))]
     except HTTPException:
         pass
     # try corpus (text)
@@ -90,7 +92,7 @@ async def fetch(book: str):
 
     async def process_book(book):
         mishna_data = await fetch_data_by_text(book)
-        return BookData(bookname=book, book=parse_text_structure(mishna_data))
+        return BookData(bookname=heb_book_name(mishna_data), book=parse_text_structure(mishna_data))
 
     tasks = [process_book(book) for book in books]
     return await asyncio.gather(*tasks)

@@ -6,7 +6,7 @@ A service to divide a book learning into units for daily kviut learning
 2. schedule a book by section & chapter ✅
 3. schedule list of books by section & chapter & book ✅
 4. cache alreay fetched books ✅
-5. bookmark out of schedule
+5. bookmark out of schedule ✅
 6. schedule a book (or list of books) by chapter only (and book)
 7. Index API (Rambam/Tur?)
 8. schedule a book by pages
@@ -16,8 +16,13 @@ A service to divide a book learning into units for daily kviut learning
 - Schedule a Mishna Masechet (1, 2) ✅
 - Schedule a Mishna Seder/All (3) ✅
 - Schedule a Mishna Seder with book caching (4) ✅
-- Integrate with Bookmarker (5)
+- Integrate with Bookmarker (5) ✅
 - Schedule a Mishna Seder by Chapter (6) ✅
+- Override bookmark title / consider refactor to class for simplify (bookmarker)
+- Dynamic margin between bookmark columns (bookmarker)
+- Override Shabbos learning and bold shabbos and Moadim (bookmarker)
+- Starts learn from version instead of Until version (bookmarker)
+- Hebrew book param (scheduler)
 - Schedule Mishneh Torah / Tur? (7)
 - Support Gmara (Single Book, by pages)
 - Check if sefaria dataset contains pages division

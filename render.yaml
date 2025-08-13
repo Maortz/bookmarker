@@ -13,11 +13,25 @@ services:
     autoDeploy: true
 
   - type: web
-    name: bookmarkers-service
+    name: bookmarker-service
     env: python
     plan: free
     buildCommand: cd bookmarker && pip install -r requirements.txt
     startCommand: cd bookmarker && uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    branch: main
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    autoDeploy: true
+
+  - type: web
+    name: book-learning-orchestrator
+    env: python
+    rootDir: orchestrator
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.main:app --host 0.0.0.0 --port $PORT
     branch: main
     healthCheckPath: /health
     envVars:
