@@ -5,7 +5,7 @@ from io import BytesIO, StringIO
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, FileResponse
 from src.config import Args
 from src.core import from_str, create_bookmark
 from src.input_generator import HebrewCalendar
@@ -80,13 +80,17 @@ async def gen_tanah_htmlpage(
         bold=bold,
     )
 
+    y = simhas_torah_dates[0].hebrew_year(True, True)
     with tempfile.TemporaryDirectory() as tmpdirname:
+        title = f'לוח תנ"ך יומי - {y}'
         args = Args(
             input=full_bookmark,
             out=tmpdirname,
             width=width,
             height=height,
             font_size=font,
+            title=title,
+            subtitle='לימוד כל התנ"ך בשנה אחת - עפ"י חלוקת המסורה',
             printer=write_html,
         )
         create_bookmark(args)
@@ -99,6 +103,8 @@ async def generate_html(
     width: int = Query(10, description="Bookmark width (cm)"),
     height: int = Query(15, description="Bookmark height (cm)"),
     font: int = Query(12, description="Font size"),
+    title: str = Query("Title", description="Title"),
+    subtitle: str = Query("Sub Title", description="Sub Title"),
     start_date: datetime.date = Query(
         ...,
         description="Start date (in the format of 2024-10-03)",
@@ -145,6 +151,8 @@ async def generate_html(
             width=width,
             height=height,
             font_size=font,
+            title=title,
+            subtitle=subtitle,
             printer=write_html,
         )
         create_bookmark(args)
@@ -160,6 +168,8 @@ async def generate_svgs(
     width: int = Query(10, description="Bookmark width (cm)"),
     height: int = Query(15, description="Bookmark height (cm)"),
     font: int = Query(12, description="Font size"),
+    title: str = Query("Title", description="Title"),
+    subtitle: str = Query("Sub Title", description="Sub Title"),
     csv_file: UploadFile = File(..., description="CSV file with date and chapter"),
 ):
     csv_content = await csv_file.read()
@@ -172,6 +182,8 @@ async def generate_svgs(
             width=width,
             height=height,
             font_size=font,
+            title=title,
+            subtitle=subtitle,
             printer=write_svgs,
         )
         create_bookmark(args)
@@ -185,6 +197,14 @@ async def generate_svgs(
                 headers={"Content-Disposition": "attachment; filename=bookmarks.zip"},
             )
 
+@app.get("/bookmarker/images/{filename}")
+async def get_uploaded_image(filename: str):
+    file_path = Path(f"images/{filename}")
+    
+    if not file_path.exists():
+        return {"error": "File not found"}, 404
+    
+    return FileResponse(file_path)
 
 def start_service():
     import uvicorn

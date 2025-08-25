@@ -15,4 +15,4 @@ def create_bookmark(args: Args) -> None:
     config = Config(Config.fix_a4(Size(args.width, args.height)), args.font_size)
     idx = get_idx(config, len(args.input))
     bookmarks = get_svg_lines(args.input, config, idx)
-    args.printer(bookmarks, config, idx, args.out)
+    args.printer(args.title, bookmarks, config, idx, args.out)

@@ -3,18 +3,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 Size = namedtuple("Size", ["width", "height"])
-Row = namedtuple("Row", ["date", "info", "bold"], defaults=(None,)*3)
-
-
-@dataclass
-class Args:
-    input: list[Row]
-    out: str
-    width: int
-    height: int
-    font_size: int
-    printer: Callable
-
+Row = namedtuple("Row", ["date", "info", "bold", "underline"], defaults=(None,)*4)
 
 @dataclass(frozen=True)
 class Config:
@@ -45,3 +34,15 @@ class Config:
     def fix_a4(s: Size) -> Size:
         a4_fix = 1
         return Size(a4_fix * s.width, a4_fix * s.height)
+
+
+@dataclass
+class Args:
+    input: list[Row]
+    out: str
+    width: int
+    height: int
+    font_size: int
+    title: str
+    subtitle: str
+    printer: Callable[[str, list[list[str]], Config, list[Row], str], None]

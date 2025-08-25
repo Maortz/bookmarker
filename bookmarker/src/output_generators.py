@@ -4,17 +4,13 @@ from src.config import Row, Config, Size
 from src.svg_generator import generate_svg
 
 
-def make_bookmark_svgs(
-    pages: list[list[str]], config: Config, idx: list[Row]
-) -> list[str]:
-    return [generate_svg("\n".join(page), config, idx) for page in pages]
+def make_bookmark_svgs(title: str, pages: list[list[str]], config: Config, idx: list[Row]) -> list[str]:
+    return [generate_svg(title, "\n".join(page), config, idx) for page in pages]
 
 
-def write_svgs(
-    bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir: str
-) -> None:
-    pages = make_bookmark_svgs(bookmarks, config, idx)
-    out_dir = Path(out_dir)
+def write_svgs(title: str, bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir_str: str) -> None:
+    pages = make_bookmark_svgs(title, bookmarks, config, idx)
+    out_dir = Path(out_dir_str)
     out_dir.mkdir(exist_ok=True)
 
     for i, page in enumerate(pages, 1):
@@ -90,11 +86,9 @@ def make_printable_html(bookmarks: list[str], conf: Config) -> str:
     """
 
 
-def write_html(
-    bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir: str
-) -> None:
-    html = make_printable_html(make_bookmark_svgs(bookmarks, config, idx), config)
-    out_dir = Path(out_dir)
+def write_html(title: str, bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir_str: str) -> None:
+    html = make_printable_html(make_bookmark_svgs(title, bookmarks, config, idx), config)
+    out_dir = Path(out_dir_str)
     out_dir.mkdir(exist_ok=True)
 
     with Path(out_dir / "bookmarks.html").open("w", encoding="utf8") as file:
