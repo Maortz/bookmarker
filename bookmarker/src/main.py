@@ -6,7 +6,7 @@ from io import BytesIO, StringIO
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, FileResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from src.config import Args, Content, Logo
 from src.core import from_str, create_bookmark
 from src.input_generator import HebrewCalendar
@@ -212,15 +212,6 @@ async def generate_svgs(
                 media_type="application/zip",
                 headers={"Content-Disposition": "attachment; filename=bookmarks.zip"},
             )
-
-# @app.get("/bookmarker/images/{filename}")
-# async def get_uploaded_image(filename: str):
-#     file_path = Path(f"images/{filename}")
-    
-#     if not file_path.exists():
-#         return {"error": "File not found"}, 404
-    
-#     return FileResponse(file_path)
 
 def start_service():
     import uvicorn
