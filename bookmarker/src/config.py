@@ -5,7 +5,7 @@ from typing import Callable, Any
 Size = namedtuple("Size", ["width", "height"])
 Row = namedtuple("Row", ["date", "info", "bold", "underline"], defaults=(None,)*4)
 
-@dataclass(frozen=True)
+@dataclass(frozen=False)
 class PageConfig:
     size_cm: Size
     ratio: float
@@ -21,19 +21,20 @@ class PageConfig:
 
     def __post_init__(self):
         object.__setattr__(self, "ratio", 48 / self.ratio)
+        object.__setattr__(self, "size_cm", self.limit_to_A4())
         size = self.cm_to_points(self.size_cm)
         object.__setattr__(self, "size", size)
         object.__setattr__(self, "total_w_col", self.date_width + self.info_witdh)
         object.__setattr__(self, "max_lines", (size.height - self.height_margins) // 10)
 
+    def limit_to_A4(self) -> Size:
+        h = self.size_cm.height if self.size_cm.height < 29.7 else 29.7
+        w = self.size_cm.width if self.size_cm.width < 29.7 else 29.7
+        return Size(height=h, width=w)        
+
     def cm_to_points(self, s_cm: Size) -> Size:
         convert_ratio = 10 * self.ratio
         return Size(s_cm.width * convert_ratio, s_cm.height * convert_ratio)
-
-    @staticmethod
-    def fix_a4(s: Size) -> Size:
-        a4_fix = 1
-        return Size(a4_fix * s.width, a4_fix * s.height)
 
 @dataclass
 class Content:
@@ -46,7 +47,7 @@ class Content:
 class Args:
     input: list[Row]
     out: str
-    width: int
-    height: int
+    width: float
+    height: float
     font_size: int
     printer: Callable[[Content, list[Any], PageConfig, str], None]

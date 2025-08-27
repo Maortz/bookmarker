@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 
 from src.config import PageConfig, Size, Content
@@ -25,16 +26,20 @@ def write_svgs(data: Content, bookmarks: list[TableGenerator], config: PageConfi
         with Path(out_dir / f"bookmark{i}.svg").open("w", encoding="utf8") as file:
             file.write(page)
 
+def custom_round(num: float) -> int:
+    if abs(num - int(num)) >= 0.95:
+        return math.ceil(num)
+    return math.floor(num)
 
 def make_printable_html(bookmarks: list[str], conf: PageConfig) -> str:
     orientation = "Landscape"
-    A4 = PageConfig.fix_a4(Size(width=30, height=21))
-    if conf.size_cm.height > A4.height:
+    A4 = Size(width=29.7, height=21)
+    if conf.size_cm.height >= A4.height:
         orientation = "Portrait"
-        A4 = PageConfig.fix_a4(Size(width=21, height=30))
+        A4 = Size(width=21, height=29.7)
 
-    repeat_in_row = int(A4.width // conf.size_cm.width)
-    repeat_in_col = int(A4.height // conf.size_cm.height)
+    repeat_in_row = custom_round(A4.width / conf.size_cm.width)
+    repeat_in_col = custom_round(A4.height / conf.size_cm.height)
     total_in_page = repeat_in_row * repeat_in_col
 
     pages = [
@@ -67,12 +72,15 @@ def make_printable_html(bookmarks: list[str], conf: PageConfig) -> str:
             <meta name="pdfkit-margin-right" content="0"/>
             <meta name="pdfkit-margin-left" content="0"/>
             <style>
+                @page {{
+                    size: A4 {orientation.lower()};
+                }}
                 .svg-container {{
                     display: grid;
                     grid-template-columns: repeat({repeat_in_row}, 1fr);
                     grid-gap: 5px;
-                    width: 29.7cm; /* A4 landscape width */
-                    height: 21cm; /* A4 landscape height */
+                    height: {A4.height}cm; /* A4 {orientation.lower()} width */
+                    width: {A4.width}cm; /* A4 {orientation.lower()} height */
                 }}
 
                 svg {{

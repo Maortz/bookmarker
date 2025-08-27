@@ -28,29 +28,16 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@app.get("/bookmarker/tanah")
+@app.get("/bookmarker/tanah_yomi")
 async def gen_tanah_htmlpage(
-    width: int = Query(10, description="Bookmark width (cm)"),
-    height: int = Query(15, description="Bookmark height (cm)"),
+    width: float = Query(10, description="Bookmark width (cm)"),
+    height: float = Query(15, description="Bookmark height (cm)"),
     font: int = Query(12, description="Font size"),
     year: str = Query(
         ...,
         description="Hebrew year (in the format of התשפה, or just תשפה with default 5000)",
         examples=["התשפה", "תשפה"],
     ),
-    shabbos: bool = Query(True, description="Do not schedule learning on Shabbos"),
-    major_holidays: bool = Query(
-        True, description="Do not schedule learning on non-working holidays"
-    ),
-    minor_holidays: bool = Query(
-        False,
-        description="Do not schedule learning on working holidays (Hanuka, Hol Hamoed, etc.)",
-    ),
-    extra_holidays: bool = Query(
-        True,
-        description="Do not schedule learning on Purim, Tishaa Beav and Yom Haatzmaut",
-    ),
-    bold: bool = Query(True, description="Bold Shabbos or any non-learning day"),
 ):
     try:
         simhas_torah_dates = get_simhat_tora_by(year)
@@ -59,12 +46,12 @@ async def gen_tanah_htmlpage(
     
     calendar = HebrewCalendar(
         *simhas_torah_dates,
-        major_holidays=major_holidays,
-        minor_holidays=minor_holidays,
-        extra_holidays=extra_holidays,
+        major_holidays=True,
+        minor_holidays=False,
+        extra_holidays=True,
     )
 
-    days = calendar.learning_days(shabbos)
+    days = calendar.learning_days(shabbos=True)
     if days < 293:
         raise HTTPException(
             status_code=404, detail="Tanah Yomi Seder doesn't fits calender days"
@@ -76,8 +63,8 @@ async def gen_tanah_htmlpage(
     chapters_lines = csv_decoded.splitlines()
     full_bookmark = calendar.generate_csv(
         iter(chapters_lines),
-        shabbos=shabbos,
-        bold=bold,
+        shabbos=True,
+        bold=True,
     )
 
     y = simhas_torah_dates[0].hebrew_year(True, True)

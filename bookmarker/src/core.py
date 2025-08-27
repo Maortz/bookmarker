@@ -12,7 +12,7 @@ def from_str(args_input: str) -> list[Row]:
 
 
 def create_bookmark(args: Args, content: Content) -> None:
-    config = PageConfig(PageConfig.fix_a4(Size(args.width, args.height)), args.font_size)
+    config = PageConfig(Size(args.width, args.height), args.font_size)
     idx = get_idx(config, len(args.input))
     bookmarks = get_svg_tables(args.input, config, idx)
     args.printer(content, bookmarks, config, args.out)
