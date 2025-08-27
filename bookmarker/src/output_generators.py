@@ -34,7 +34,7 @@ def custom_round(num: float) -> int:
 def make_printable_html(bookmarks: list[str], conf: PageConfig) -> str:
     orientation = "Landscape"
     A4 = Size(width=29.7, height=21)
-    if conf.size_cm.height >= A4.height:
+    if conf.size_cm.height > A4.height:
         orientation = "Portrait"
         A4 = Size(width=21, height=29.7)
 
