@@ -2,4 +2,4 @@ fastapi
 uvicorn
 python-multipart
 pyluach~=2.2.0
-qr
+qrcode
