@@ -1,15 +1,23 @@
 from pathlib import Path
 
-from src.config import Row, Config, Size
-from src.svg_generator import generate_svg
+from src.config import PageConfig, Size, Content
+from src.svg_generator import TableGenerator, PageGenerator, SvgConfig
 
 
-def make_bookmark_svgs(title: str, pages: list[list[str]], config: Config, idx: list[Row]) -> list[str]:
-    return [generate_svg(title, "\n".join(page), config, idx) for page in pages]
+def make_bookmark_svgs(data: Content, tables: list[TableGenerator], config: PageConfig) -> list[str]:
+    conf = SvgConfig(
+        page_config=config,
+        title_offset=30,
+        table_x_offset=20,
+        table_y_offset=70,
+        footer_margin=12,
+        qr_size=35,
+    )
+    return [PageGenerator(conf, data.title, data.subtitle, data.url, data.logo, table).build() for table in tables]
 
 
-def write_svgs(title: str, bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir_str: str) -> None:
-    pages = make_bookmark_svgs(title, bookmarks, config, idx)
+def write_svgs(data: Content, bookmarks: list[TableGenerator], config: PageConfig, out_dir_str: str) -> None:
+    pages = make_bookmark_svgs(data, bookmarks, config)
     out_dir = Path(out_dir_str)
     out_dir.mkdir(exist_ok=True)
 
@@ -18,12 +26,12 @@ def write_svgs(title: str, bookmarks: list[list[str]], config: Config, idx: list
             file.write(page)
 
 
-def make_printable_html(bookmarks: list[str], conf: Config) -> str:
+def make_printable_html(bookmarks: list[str], conf: PageConfig) -> str:
     orientation = "Landscape"
-    A4 = Config.fix_a4(Size(width=30, height=21))
+    A4 = PageConfig.fix_a4(Size(width=30, height=21))
     if conf.size_cm.height > A4.height:
         orientation = "Portrait"
-        A4 = Config.fix_a4(Size(width=21, height=30))
+        A4 = PageConfig.fix_a4(Size(width=21, height=30))
 
     repeat_in_row = int(A4.width // conf.size_cm.width)
     repeat_in_col = int(A4.height // conf.size_cm.height)
@@ -86,8 +94,8 @@ def make_printable_html(bookmarks: list[str], conf: Config) -> str:
     """
 
 
-def write_html(title: str, bookmarks: list[list[str]], config: Config, idx: list[Row], out_dir_str: str) -> None:
-    html = make_printable_html(make_bookmark_svgs(title, bookmarks, config, idx), config)
+def write_html(data: Content, bookmarks: list[TableGenerator], config: PageConfig, out_dir_str: str) -> None:
+    html = make_printable_html(make_bookmark_svgs(data, bookmarks, config), config)
     out_dir = Path(out_dir_str)
     out_dir.mkdir(exist_ok=True)
 

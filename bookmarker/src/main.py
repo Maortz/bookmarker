@@ -6,7 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, FileResponse
-from src.config import Args
+from src.config import Args, Content
 from src.core import from_str, create_bookmark
 from src.input_generator import HebrewCalendar
 from src.output_generators import write_html, write_svgs
@@ -89,13 +89,17 @@ async def gen_tanah_htmlpage(
             width=width,
             height=height,
             font_size=font,
-            title=title,
-            subtitle='לימוד כל התנ"ך בשנה אחת - עפ"י חלוקת המסורה',
             printer=write_html,
         )
-        create_bookmark(args)
-        content = (Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")
-        return HTMLResponse(content)
+        content = Content(
+            title=title, 
+            subtitle='לימוד כל התנ"ך בשנה אחת - עפ"י חלוקת המסורה',
+            url="www.tanachyomi.co.il",
+            logo="images/TanachLogo.png",
+        )
+        create_bookmark(args, content)
+        html = (Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")
+        return HTMLResponse(html)
 
 
 @app.post("/bookmarker/html")
@@ -151,11 +155,15 @@ async def generate_html(
             width=width,
             height=height,
             font_size=font,
-            title=title,
-            subtitle=subtitle,
             printer=write_html,
         )
-        create_bookmark(args)
+        content = Content(
+            title=title, 
+            subtitle=subtitle,
+            url="url",
+            logo="logo file",
+        )
+        create_bookmark(args ,content)
         return StreamingResponse(
             StringIO((Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")),
             media_type="text/html",
@@ -182,11 +190,15 @@ async def generate_svgs(
             width=width,
             height=height,
             font_size=font,
-            title=title,
-            subtitle=subtitle,
             printer=write_svgs,
         )
-        create_bookmark(args)
+        content = Content(
+            title=title, 
+            subtitle=subtitle,
+            url="url",
+            logo="logo file",
+        )
+        create_bookmark(args, content)
         zip_path = Path(tmpdirname) / "bookmarks.zip"
         svg_files = list(Path(tmpdirname).glob("*.svg"))
         if svg_files:

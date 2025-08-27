@@ -1,12 +1,12 @@
 from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Callable, Any
 
 Size = namedtuple("Size", ["width", "height"])
 Row = namedtuple("Row", ["date", "info", "bold", "underline"], defaults=(None,)*4)
 
 @dataclass(frozen=True)
-class Config:
+class PageConfig:
     size_cm: Size
     ratio: float
 
@@ -35,6 +35,12 @@ class Config:
         a4_fix = 1
         return Size(a4_fix * s.width, a4_fix * s.height)
 
+@dataclass
+class Content:
+    title: str
+    subtitle: str
+    url: str
+    logo: str
 
 @dataclass
 class Args:
@@ -43,6 +49,4 @@ class Args:
     width: int
     height: int
     font_size: int
-    title: str
-    subtitle: str
-    printer: Callable[[str, list[list[str]], Config, list[Row], str], None]
+    printer: Callable[[Content, list[Any], PageConfig, str], None]
