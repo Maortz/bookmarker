@@ -36,12 +36,14 @@ class PageConfig:
         convert_ratio = 10 * self.ratio
         return Size(s_cm.width * convert_ratio, s_cm.height * convert_ratio)
 
+Logo = namedtuple("Logo", ["content_type", "base64_data"])
+
 @dataclass
 class Content:
     title: str
-    subtitle: str
-    url: str
-    logo: str
+    subtitle: str|None
+    url: str|None
+    logo: Logo|None
 
 @dataclass
 class Args:

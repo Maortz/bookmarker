@@ -1,8 +1,9 @@
 from dataclasses import dataclass, field
 from io import BytesIO
+from typing import Optional
 import qrcode
 import qrcode.image.svg as svg
-from src.config import Row, PageConfig
+from src.config import Logo, Row, PageConfig
 
 @dataclass
 class SvgConfig:
@@ -57,7 +58,7 @@ class TableGenerator:
         """
 
 class PageGenerator:
-    def __init__(self, conf: SvgConfig, title: str, subtitle: str, url: str, logo: str, table: TableGenerator) -> None:
+    def __init__(self, conf: SvgConfig, title: str, subtitle: Optional[str], url: Optional[str], logo: Optional[Logo], table: TableGenerator) -> None:
         self.conf = conf
         self.title = title
         self.subtitle = subtitle
@@ -72,13 +73,16 @@ class PageGenerator:
         <rect x="{frame_margin}" y="{frame_margin}" width="{self.conf.page_config.size.width - 2*frame_margin}" height="{self.conf.page_config.size.height - 2*frame_margin}" fill="#fff" stroke="#88A0B8" stroke-width="2"/>
         """
     
-    def get_title(self, title: str, subtitle: str) -> str:
+    def get_title(self, title: str, subtitle: Optional[str]) -> str:
         subtitle_margin = 15
+        sub = ""
+        if subtitle:
+            sub = f'<text x="0" y="{subtitle_margin}" text-anchor="middle" font-family="Arial" font-size="10" fill="#2C3E50">{subtitle}</text>'
         return f"""
         <!-- Title Section -->
         <g transform="translate({self.conf.middle_width}, {self.conf.title_offset})">
             <text x="0" y="0" text-anchor="middle" font-family="Arial" font-size="18" fill="#2C3E50">{title}</text>
-            <text x="0" y="{subtitle_margin}" text-anchor="middle" font-family="Arial" font-size="10" fill="#2C3E50">{subtitle}</text>
+            {sub}
         </g>
         """
     
@@ -89,18 +93,31 @@ class PageGenerator:
         </g>
         """
     
-    def get_footer(self, url: str, logo: str) -> str:
+    def get_footer(self, url: Optional[str], logo: Optional[Logo]) -> str:
         y_offset = self.conf.page_config.size.height - 2 * self.conf.footer_margin - self.conf.qr_size - 2
         qr_margin = 5
         space = 2
+
+        qr_svg = url_svg = ""
+        if url:
+            pos = self.conf.qr_size + space if logo else self.conf.qr_size // 2
+            qr_svg = f"""
+            <g transform="translate({0 - pos},0)">
+                    {_qr_svg_snippet(url)}
+            </g>
+            """
+            url_svg = f'<text x="0" y="{self.conf.qr_size + space}" text-anchor="middle" font-family="Arial" font-size="8">{url}</text>'
+        logo_svg = ""
+        if logo:
+            pos = space if url else 0
+            logo_svg = f'<image href="data:{logo.content_type};base64,{logo.base64_data}" x="{pos}" y="{qr_margin}" height="{self.conf.qr_size - 2 * qr_margin}" />'
+
         return f"""
         <!-- Fotter -->
         <g transform="translate({self.conf.middle_width},{y_offset})">
-            <g transform="translate({0 - self.conf.qr_size - space},0)">
-                {_qr_svg_snippet(url)}
-            </g>
-            <image href="{logo}" x="{space}" y="{qr_margin}" height="{self.conf.qr_size - 2 * qr_margin}" />
-            <text x="0" y="{self.conf.qr_size + space}" text-anchor="middle" font-family="Arial" font-size="8">{url}</text>
+            {qr_svg}
+            {logo_svg}
+            {url_svg}
         </g>
         """
     
