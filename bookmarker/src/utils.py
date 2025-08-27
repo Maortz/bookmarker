@@ -3,14 +3,14 @@ from pathlib import Path
 from typing import Iterable
 
 from pyluach.dates import HebrewDate
-from src.config import Config, Row
+from src.config import PageConfig, Row
 
 
-def more_col_avaible(left_space: int, conf: Config) -> bool:
+def more_col_avaible(left_space: int, conf: PageConfig) -> bool:
     return left_space - conf.total_w_col >= conf.left_margin
 
 
-def get_idx(conf: Config, csv_lines: int) -> list[Row]:
+def get_idx(conf: PageConfig, csv_lines: int) -> list[Row]:
     idx = []
     width = conf.size.width - conf.right_page_margin
     cols_for_row = csv_lines / conf.max_lines

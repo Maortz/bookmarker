@@ -65,6 +65,11 @@ class HebrewCalendar:
         while current_date <= end_date:
             info = None
             day_of_week = current_date.weekday()
+            
+            last_day_of_month = False
+            if current_date.month_name(True) != current_date.add(days=1).month_name(True):
+                last_day_of_month = True
+
             if day_of_week == 7:
                 # shabbos title
                 parasha = parshios.getparsha(current_date, israel=True)
@@ -90,11 +95,12 @@ class HebrewCalendar:
             yield (
                 f"{current_date.hebrew_day(False)} {current_date.month_name(True)}",
                 info,
+                last_day_of_month,
             )
             current_date = current_date.add(days=1)
 
     def learning_days(self, shabbos: bool = True) -> int:
-        return sum(1 for date, info in self._date_info if not (info and shabbos))
+        return sum(1 for date, info, _ in self._date_info if not (info and shabbos))
 
     def generate_csv(
         self,
@@ -109,15 +115,16 @@ class HebrewCalendar:
         """
         full_csv = []
         try:
-            for date, info in self._date_info:
+            for date, info, last_day_month in self._date_info:
                 if info and shabbos:
-                    full_csv.append(Row(date=date, info=info, bold=bold))
+                    full_csv.append(Row(date=date, info=info, bold=bold, underline=last_day_month))
                 else:
                     full_csv.append(
                         Row(
                             date=date,
                             info=next(input_iterator),
                             bold=bold and info is not None,
+                            underline=last_day_month,
                         )
                     )
         except StopIteration:

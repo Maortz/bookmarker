@@ -1,3 +1,4 @@
+import base64
 import datetime
 import shutil
 import tempfile
@@ -6,7 +7,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
-from src.config import Args
+from src.config import Args, Content, Logo
 from src.core import from_str, create_bookmark
 from src.input_generator import HebrewCalendar
 from src.output_generators import write_html, write_svgs
@@ -28,29 +29,16 @@ async def health_check():
     return {"status": "healthy"}
 
 
-@app.get("/bookmarker/tanah")
+@app.get("/bookmarker/tanah_yomi")
 async def gen_tanah_htmlpage(
-    width: int = Query(10, description="Bookmark width (cm)"),
-    height: int = Query(15, description="Bookmark height (cm)"),
-    font: int = Query(12, description="Font size"),
     year: str = Query(
         ...,
         description="Hebrew year (in the format of התשפה, or just תשפה with default 5000)",
         examples=["התשפה", "תשפה"],
     ),
-    shabbos: bool = Query(True, description="Do not schedule learning on Shabbos"),
-    major_holidays: bool = Query(
-        True, description="Do not schedule learning on non-working holidays"
-    ),
-    minor_holidays: bool = Query(
-        False,
-        description="Do not schedule learning on working holidays (Hanuka, Hol Hamoed, etc.)",
-    ),
-    extra_holidays: bool = Query(
-        True,
-        description="Do not schedule learning on Purim, Tishaa Beav and Yom Haatzmaut",
-    ),
-    bold: bool = Query(True, description="Bold Shabbos or any non-learning day"),
+    width: float = Query(10, description="Bookmark width (cm)"),
+    height: float = Query(15, description="Bookmark height (cm)"),
+    font: int = Query(12, description="Font size"),
 ):
     try:
         simhas_torah_dates = get_simhat_tora_by(year)
@@ -59,12 +47,12 @@ async def gen_tanah_htmlpage(
     
     calendar = HebrewCalendar(
         *simhas_torah_dates,
-        major_holidays=major_holidays,
-        minor_holidays=minor_holidays,
-        extra_holidays=extra_holidays,
+        major_holidays=True,
+        minor_holidays=False,
+        extra_holidays=True,
     )
 
-    days = calendar.learning_days(shabbos)
+    days = calendar.learning_days(shabbos=True)
     if days < 293:
         raise HTTPException(
             status_code=404, detail="Tanah Yomi Seder doesn't fits calender days"
@@ -76,11 +64,15 @@ async def gen_tanah_htmlpage(
     chapters_lines = csv_decoded.splitlines()
     full_bookmark = calendar.generate_csv(
         iter(chapters_lines),
-        shabbos=shabbos,
-        bold=bold,
+        shabbos=True,
+        bold=True,
     )
 
+    y = simhas_torah_dates[0].hebrew_year(True, True)
+    logo = base64.b64encode(Path("images/TanachLogo.png").read_bytes()).decode("utf-8")
+
     with tempfile.TemporaryDirectory() as tmpdirname:
+        title = f'לוח תנ"ך יומי - {y}'
         args = Args(
             input=full_bookmark,
             out=tmpdirname,
@@ -89,16 +81,19 @@ async def gen_tanah_htmlpage(
             font_size=font,
             printer=write_html,
         )
-        create_bookmark(args)
-        content = (Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")
-        return HTMLResponse(content)
+        content = Content(
+            title=title, 
+            subtitle='לימוד כל התנ"ך בשנה אחת - עפ"י חלוקת המסורה',
+            url="www.tanachyomi.co.il",
+            logo=Logo(content_type="image/png", base64_data=logo),
+        )
+        create_bookmark(args, content)
+        html = (Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")
+        return HTMLResponse(html)
 
 
 @app.post("/bookmarker/html")
 async def generate_html(
-    width: int = Query(10, description="Bookmark width (cm)"),
-    height: int = Query(15, description="Bookmark height (cm)"),
-    font: int = Query(12, description="Font size"),
     start_date: datetime.date = Query(
         ...,
         description="Start date (in the format of 2024-10-03)",
@@ -109,6 +104,14 @@ async def generate_html(
         description="End date, inclusive (default to 1 hebrew year)",
         examples=[None, "2025-09-22"],
     ),
+    csv_file: UploadFile = File(..., description="CSV file with chapters (single column)"),
+    title: str = Query("Title", description="Title"),
+    subtitle: str | None = Query(None, description="Sub Title"),
+    logo: UploadFile | None = None,
+    url: str|None = Query(None, description="Link on the bookmark"),
+    width: int = Query(10, description="Bookmark width (cm)"),
+    height: int = Query(15, description="Bookmark height (cm)"),
+    font: int = Query(12, description="Font size"),
     shabbos: bool = Query(True, description="Do not schedule learning on Shabbos"),
     major_holidays: bool = Query(
         True, description="Do not schedule learning on non-working holidays"
@@ -122,7 +125,6 @@ async def generate_html(
         description="Do not schedule learning on Purim, Tishaa Beav and Yom Haatzmaut",
     ),
     bold: bool = Query(True, description="Bold Shabbos or any non-learning day"),
-    csv_file: UploadFile = File(..., description="CSV file with chapters"),
 ):
     csv_content = await csv_file.read()
     csv_decoded = csv_content.decode("utf-8")
@@ -138,6 +140,11 @@ async def generate_html(
         bold=bold,
     )
 
+    encoded_logo = None
+    if logo:
+        content = await logo.read()
+        encoded_logo = Logo(logo.content_type, base64.b64encode(content).decode("utf-8"))
+    
     with tempfile.TemporaryDirectory() as tmpdirname:
         args = Args(
             input=bookmark_csv,
@@ -147,7 +154,13 @@ async def generate_html(
             font_size=font,
             printer=write_html,
         )
-        create_bookmark(args)
+        content = Content(
+            title=title, 
+            subtitle=subtitle,
+            url=url,
+            logo=encoded_logo,
+        )
+        create_bookmark(args ,content)
         return StreamingResponse(
             StringIO((Path(tmpdirname) / "bookmarks.html").read_text(encoding="utf-8")),
             media_type="text/html",
@@ -157,14 +170,23 @@ async def generate_html(
 
 @app.post("/bookmarker/svgs")
 async def generate_svgs(
+    csv_file: UploadFile = File(..., description="CSV file with date and chapter (2 columns)"),
+    title: str = Query("Title", description="Title"),
+    subtitle: str|None = Query(None, description="Sub Title"),
     width: int = Query(10, description="Bookmark width (cm)"),
     height: int = Query(15, description="Bookmark height (cm)"),
     font: int = Query(12, description="Font size"),
-    csv_file: UploadFile = File(..., description="CSV file with date and chapter"),
+    logo: UploadFile | None = None,
+    url: str|None = Query(None, description="Link on the bookmark"),
 ):
     csv_content = await csv_file.read()
     csv_decoded = csv_content.decode("utf-8")
 
+    encoded_logo = None
+    if logo:
+        content = await logo.read()
+        encoded_logo = Logo(logo.content_type, base64.b64encode(content).decode("utf-8"))
+    
     with tempfile.TemporaryDirectory() as tmpdirname:
         args = Args(
             input=from_str(csv_decoded),
@@ -174,7 +196,13 @@ async def generate_svgs(
             font_size=font,
             printer=write_svgs,
         )
-        create_bookmark(args)
+        content = Content(
+            title=title, 
+            subtitle=subtitle,
+            url=url,
+            logo=encoded_logo,
+        )
+        create_bookmark(args, content)
         zip_path = Path(tmpdirname) / "bookmarks.zip"
         svg_files = list(Path(tmpdirname).glob("*.svg"))
         if svg_files:
@@ -184,7 +212,6 @@ async def generate_svgs(
                 media_type="application/zip",
                 headers={"Content-Disposition": "attachment; filename=bookmarks.zip"},
             )
-
 
 def start_service():
     import uvicorn
