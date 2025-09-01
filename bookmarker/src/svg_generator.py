@@ -100,7 +100,7 @@ class PageGenerator:
 
         qr_svg = url_svg = ""
         if url:
-            pos = self.conf.qr_size + space if logo else self.conf.qr_size // 2
+            pos = self.conf.qr_size + space + qr_margin if logo else self.conf.qr_size // 2
             qr_svg = f"""
             <g transform="translate({0 - pos},0)">
                     {_qr_svg_snippet(url)}
@@ -109,7 +109,7 @@ class PageGenerator:
             url_svg = f'<text x="0" y="{self.conf.qr_size + space}" text-anchor="middle" font-family="Arial" font-size="8">{url}</text>'
         logo_svg = ""
         if logo:
-            pos = space if url else 0
+            pos = -qr_margin if url else 0
             logo_svg = f'<image href="data:{logo.content_type};base64,{logo.base64_data}" x="{pos}" y="{qr_margin}" height="{self.conf.qr_size - 2 * qr_margin}" />'
 
         return f"""
