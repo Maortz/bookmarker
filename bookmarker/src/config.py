@@ -5,7 +5,7 @@ from typing import Callable, Any
 Size = namedtuple("Size", ["width", "height"])
 Row = namedtuple("Row", ["date", "info", "bold", "underline"], defaults=(None,)*4)
 
-@dataclass(frozen=False)
+@dataclass(frozen=True)
 class PageConfig:
     size_cm: Size
     ratio: float
@@ -21,15 +21,20 @@ class PageConfig:
 
     def __post_init__(self):
         object.__setattr__(self, "ratio", 48 / self.ratio)
-        object.__setattr__(self, "size_cm", self.limit_to_A4())
+        size_cm = self.limit_to_A4()
+        object.__setattr__(self, "size_cm", size_cm)
         size = self.cm_to_points(self.size_cm)
         object.__setattr__(self, "size", size)
         object.__setattr__(self, "total_w_col", self.date_width + self.info_witdh)
         object.__setattr__(self, "max_lines", (size.height - self.height_margins) // 10)
 
     def limit_to_A4(self) -> Size:
-        h = self.size_cm.height if self.size_cm.height < 29.7 else 29.7
-        w = self.size_cm.width if self.size_cm.width < 29.7 else 29.7
+        h = min(self.size_cm.height, 29.7)
+        w = min(self.size_cm.width, 29.7)
+        if h >= 29.7 and w >= 29.7:
+            raise ValueError("Page size limited to A4")
+        if h <= 0 or w <= 0:
+            raise ValueError("Page size cannot be 0 or negative")
         return Size(height=h, width=w)        
 
     def cm_to_points(self, s_cm: Size) -> Size:
@@ -51,5 +56,5 @@ class Args:
     out: str
     width: float
     height: float
-    font_size: int
+    font_size: float
     printer: Callable[[Content, list[Any], PageConfig, str], None]
