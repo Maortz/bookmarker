@@ -38,7 +38,7 @@ async def gen_tanah_htmlpage(
     ),
     width: float = Query(10, description="Bookmark width (cm)"),
     height: float = Query(15, description="Bookmark height (cm)"),
-    font: int = Query(12, description="Font size"),
+    font: float = Query(12, description="Font size"),
 ):
     try:
         simhas_torah_dates = get_simhat_tora_by(year)
@@ -109,9 +109,9 @@ async def generate_html(
     subtitle: str | None = Query(None, description="Sub Title"),
     logo: UploadFile | None = None,
     url: str|None = Query(None, description="Link on the bookmark"),
-    width: int = Query(10, description="Bookmark width (cm)"),
-    height: int = Query(15, description="Bookmark height (cm)"),
-    font: int = Query(12, description="Font size"),
+    width: float = Query(10, description="Bookmark width (cm)"),
+    height: float = Query(15, description="Bookmark height (cm)"),
+    font: float = Query(12, description="Font size"),
     shabbos: bool = Query(True, description="Do not schedule learning on Shabbos"),
     major_holidays: bool = Query(
         True, description="Do not schedule learning on non-working holidays"
@@ -173,9 +173,9 @@ async def generate_svgs(
     csv_file: UploadFile = File(..., description="CSV file with date and chapter (2 columns)"),
     title: str = Query("Title", description="Title"),
     subtitle: str|None = Query(None, description="Sub Title"),
-    width: int = Query(10, description="Bookmark width (cm)"),
-    height: int = Query(15, description="Bookmark height (cm)"),
-    font: int = Query(12, description="Font size"),
+    width: float = Query(10, description="Bookmark width (cm)"),
+    height: float = Query(15, description="Bookmark height (cm)"),
+    font: float = Query(12, description="Font size"),
     logo: UploadFile | None = None,
     url: str|None = Query(None, description="Link on the bookmark"),
 ):
