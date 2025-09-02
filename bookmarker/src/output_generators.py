@@ -50,10 +50,11 @@ def make_printable_html(bookmarks: list[str], conf: PageConfig) -> str:
         [
             "\n".join(
                 [
-                    '<div class="svg-container">{}</div>'.format(
-                        "\n".join(page[i : i + repeat_in_row])
-                    )
-                    for i in range(0, total_in_page, repeat_in_row)
+                    '<div class="svg-container">{}</div>'.format("\n".join(chunk))
+                    for chunk in reversed([
+                        page[i : i + repeat_in_row]
+                        for i in range(0, total_in_page, repeat_in_row)
+                    ])
                 ]
             )
             for page in pages
