@@ -27,7 +27,6 @@ services:
 
   - type: web
     name: bookmarker-front
-    buildCommand: echo done
     env: node
     plan: free
     buildCommand: cd bookmarker-front && npm install
