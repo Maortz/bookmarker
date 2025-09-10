@@ -7,6 +7,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+
 from src.config import Args, Content, Logo
 from src.core import from_str, create_bookmark
 from src.input_generator import HebrewCalendar
@@ -18,6 +20,18 @@ app = FastAPI(
     description="Generate bookmark files for daily learning.",
 )
 
+origins = [
+    "http://localhost",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/", include_in_schema=False)
 async def root():

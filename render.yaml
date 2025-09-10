@@ -24,3 +24,13 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
     autoDeploy: true
+
+  - type: web
+    name: bookmarker-front
+    buildCommand: echo done
+    env: node
+    plan: free
+    buildCommand: cd bookmarker-front && npm install
+    startCommand: cd bookmarker-front && npm start
+    port: 3000
+    pullRequestPreviewsEnabled: true

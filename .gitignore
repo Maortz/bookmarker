@@ -3,3 +3,4 @@ build/
 dist/
 .ruff_cache/
 .vscode/
+node_modules/
