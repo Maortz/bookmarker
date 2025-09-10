@@ -4,7 +4,7 @@ function App() {
   const [tempWidth, setTempWidth] = useState(21);
   const [tempHeight, setTempHeight] = useState(29.7);
   const [tempFont, setTempFont] = useState(15.7);
-  const [year, setYear] = useState('התשפו');
+  const [year, setYear] = useState('');
 
   const [width, setWidth] = useState(21);
   const [height, setHeight] = useState(29.7);
@@ -12,14 +12,52 @@ function App() {
 
   const [html, setHtml] = useState('');
 
-  const fetchHtml = () => {
-    const url = `https://bookmarkers-service.onrender.com/bookmarker/tanah_yomi?width=${width}&height=${height}&font=${font}&year=${year}`;
-    fetch(url)
-      .then(res => res.text())
-      .then(data => setHtml(data));
+  const [yearOptions, setYearOptions] = useState([]);
+
+  const toHebYear = async (date) => {
+    try {
+      const today = date.toISOString().slice(0, 10); // format YYYY-MM-DD
+      const res = await fetch(`https://www.hebcal.com/converter?cfg=json&date=${today}&g2h=1&strict=1`);
+      const data = await res.json();
+
+      if (data && data.heDateParts && data.heDateParts.y) {
+        const year = data.heDateParts.y
+        const currentYear = year.slice(0, -2) + year.slice(-1)
+        return "ה" + currentYear
+      }
+    } catch (e) {
+      console.error('Error fetching Hebrew year:', e);
+      return null
+    }
+  }
+
+  // Fetch the current Hebrew year from Hebcal API
+  const fetchCurrentHebrewYear = async () => {
+    const today = new Date()
+    const years = [];
+    today.setFullYear(today.getFullYear() - 1)
+    years.push(await toHebYear(today)) // prev
+    years.push(await toHebYear(new Date())) // this year
+    today.setFullYear(today.getFullYear() + 2); // next
+    years.push(await toHebYear(today))
+    setYearOptions(years);
+    setYear(years[1]);
   };
 
   useEffect(() => {
+    fetchCurrentHebrewYear();
+  }, []);
+
+  useEffect(() => {
+    const url = `https://bookmarkers-service.onrender.com/bookmarker/tanah_yomi?width=${width}&height=${height}&font=${font}&year=${year}`;
+    const fetchHtml = () => {
+      if (!year)
+        return
+      fetch(url)
+        .then(res => res.text())
+        .then(data => setHtml(data));
+    };
+
     fetchHtml();
   }, [width, height, font, year]);
 
@@ -28,7 +66,7 @@ function App() {
 
   const handleHeightChange = (e) => setTempHeight(e.target.value);
   const handleHeightCommit = () => setHeight(tempHeight);
-  
+
   const handleFontChange = (e) => setTempFont(e.target.value);
   const handleFontCommit = () => setFont(tempFont);
 
@@ -93,18 +131,16 @@ function App() {
         <label>
           שנה:
           <select value={year} onChange={handleYearChange} style={{ fontSize: '1rem', padding: 4, marginTop: 4 }}>
-            <option value="התשפו">התשפו</option>
-            <option value="התשפז">התשפז</option>
-            <option value="התשפח">התשפח</option>
-            <option value="התשפט">התשפט</option>
-            {/* Add more year options as needed */}
+            {yearOptions.map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
           </select>
         </label>
       </div>
 
       <div
         className="printable-content"
-        style={{ border: '1px solid #ccc', minHeight: 400, fontSize: font}}
+        style={{ border: '1px solid #ccc', minHeight: 400, fontSize: font }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
@@ -121,7 +157,6 @@ function App() {
             left: 0;
             top: 0;
             width: 100%;
-            direction: rtl;
           }
         }
       `}</style>
