@@ -31,5 +31,8 @@ services:
     plan: free
     buildCommand: cd bookmarker-front && npm install
     startCommand: cd bookmarker-front && npm start
+    envVars:
+      - key: PORT
+        value: 3000
     autoDeploy: true
     pullRequestPreviewsEnabled: true
