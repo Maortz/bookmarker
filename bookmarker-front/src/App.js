@@ -140,7 +140,7 @@ function App() {
 
       <div
         className="printable-content"
-        style={{ border: '1px solid #ccc', minHeight: 400, fontSize: font }}
+        style={{ minHeight: 400 }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
