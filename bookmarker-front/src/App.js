@@ -12,7 +12,7 @@ function App() {
     const fetchHtml = async () => {
       const url = `https://bookmarkers-service.onrender.com/bookmarker/tanah_yomi?width=${width}&height=${height}&font=${font}&year=${year}`;
       try {
-        const response = await fetch(url, {mode: 'no-cors'});
+        const response = await fetch(url);
         const page = await response.text();
         setHtml(page);
       } catch (err) {
