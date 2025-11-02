@@ -31,20 +31,21 @@ function App() {
     }
   }
 
-  // Fetch the current Hebrew year from Hebcal API
-  const fetchCurrentHebrewYear = async () => {
-    const today = new Date()
-    const years = [];
-    today.setFullYear(today.getFullYear() - 1)
-    years.push(await toHebYear(today)) // prev
-    years.push(await toHebYear(new Date())) // this year
-    today.setFullYear(today.getFullYear() + 2); // next
-    years.push(await toHebYear(today))
-    setYearOptions(years);
-    setYear(years[1]);
-  };
 
   useEffect(() => {
+    // Fetch the current Hebrew year from Hebcal API
+    const fetchCurrentHebrewYear = async () => {
+      const today = new Date()
+      const years = [];
+      today.setFullYear(today.getFullYear() - 1)
+      years.push(await toHebYear(today)) // prev
+      years.push(await toHebYear(new Date())) // this year
+      today.setFullYear(today.getFullYear() + 2); // next
+      years.push(await toHebYear(today))
+      setYearOptions(years);
+      setYear(years[1]);
+    };
+
     fetchCurrentHebrewYear();
   }, []);
 
@@ -143,20 +144,48 @@ function App() {
         style={{ minHeight: 400 }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      <button
+        onClick={() => window.print()}
+        style={{
+          position: 'fixed',
+          top: '20px',
+          left: '20px',
+          padding: '10px 20px',
+          fontSize: '1rem',
+          cursor: 'pointer',
+          borderRadius: '8px',
+          border: '1px solid #333',
+          background: '#f2f2f2',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+          zIndex: 1000
+        }}
+      >
+        🖨️ הדפס
+      </button>
 
       <style>{`
         @media print {
+          @page {
+            margin: 0;
+          }
           body * {
             visibility: hidden;
+            margin: 0 !important;
+            padding: 0 !important;
           }
           .printable-content, .printable-content * {
             visibility: visible;
           }
           .printable-content {
+            box-shadow: none;
+            border: none;
             position: absolute;
             left: 0;
             top: 0;
             width: 100%;
+          }
+          button {
+            display: none !important;
           }
         }
       `}</style>
